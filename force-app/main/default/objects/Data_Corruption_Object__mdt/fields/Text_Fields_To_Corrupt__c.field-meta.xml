@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Text_Fields_To_Corrupt__c</fullName>
+    <description>A semicolon separated list of Field API Names (including &apos;__c&apos; if necessary) that are to be corrupted by the Data Recovery Simulation code. These fields must be editable TEXT fields.</description>
+    <externalId>false</externalId>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <label>Text Field(s) To Corrupt</label>
+    <length>255</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Active__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>This field determines whether an sObject will be corrupted on the next run.</description>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <label>Active?</label>
+    <type>Checkbox</type>
+</CustomField>

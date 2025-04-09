@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Modify_Records__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>A property to determine if records should be corrupted via field modification.</description>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <label>Modify Records</label>
+    <type>Checkbox</type>
+</CustomField>

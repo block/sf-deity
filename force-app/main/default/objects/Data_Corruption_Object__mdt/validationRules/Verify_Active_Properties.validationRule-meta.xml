@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Verify_Active_Properties</fullName>
+    <active>true</active>
+    <description>If CMDT value is Active, ensure that either Delete, Modify, or Both are selected.</description>
+    <errorConditionFormula>AND(Active__c, NOT(OR(Delete_Records__c, Modify_Records__c)))</errorConditionFormula>
+    <errorMessage>To activate this record, please ensure Delete, Modify, or Both are checked.</errorMessage>
+</ValidationRule>

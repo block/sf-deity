@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Verify_Fields_Specified</fullName>
+    <active>true</active>
+    <description>Checks to ensure that if Modify is selected, there are fields to corrupt specified.</description>
+    <errorConditionFormula>AND(
+Modify_Records__c,
+AND(ISBLANK(Text_Fields_To_Corrupt__c), ISBLANK( Number_Fields_To_Corrupt__c ))
+)</errorConditionFormula>
+    <errorMessage>In order to corrupt via modification, please specify either Text or Number Fields to Corrupt.</errorMessage>
+</ValidationRule>

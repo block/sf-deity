@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Custom_Object__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Determines whether to append &apos;__c&apos; to the end of an sObject label.</description>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <label>Custom Object?</label>
+    <type>Checkbox</type>
+</CustomField>
