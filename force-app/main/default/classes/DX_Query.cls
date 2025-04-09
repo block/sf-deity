@@ -15,18 +15,18 @@
  */
 
 public virtual class DX_Query {
-    @TestVisible static void setMock(Service mock) { instance = mock; }
-    static Service instance = new Service();
+    public static Service instance = new Service();
 
-    public static List<SObject> records(List<SObject> records)
-    {
+    public static void setMock(Service mock) {
+        instance = mock;
+    }
+
+    public static List<sObject> records(List<SObject> records) {
         return instance.passThrough(records);
     }
 
-    public virtual class Service
-    {
-        protected virtual List<SObject> passThrough(List<SObject> records)
-        {
+    public virtual class Service {
+        protected virtual List<sObject> passThrough(List<SObject> records) {
             return records;
         }
     }
