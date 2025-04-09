@@ -19,7 +19,7 @@ After taking remediation steps, such as adding bypasses for automations and vali
 
 Through the use of Salesforce Custom Metadata records on the `Data Corruption Object` CMDT, a developer can specify a number of Standard or Custom sObjects to corrupt, Standard or Custom number or text fields to corrupt on each sObject, whether to corrupt by deletion, modification, or a 50-50 split of each, and a percentage of each sObject to corrupt.
 
-![Screenshot of Data Corruption Object custom metadata page.](https://github.com/user-attachments/assets/74191f33-8dcb-4d62-8837-467c1e77ac9f)
+![Screenshot of Data Corruption Object custom metadata page.](https://github.com/user-attachments/assets/82ae40af-b6e6-47bb-ad9b-d048fc84a101)
 
 For example, in the sample data as deployed, there are three Standard sObjects (`Account`, `Case`, and `Contact`) and one Custom sObject (`My_Custom_Object__c`). Note that the CMDT record requires leaving `__c` off of the custom sObject label per Salesforce API name requirements, so it is appended in the code based on whether the Custom Object box is checked. Each of these sObjects is currently specified to be corrupted by deletion and modification at 100% (with a 50-50 split between deletion and modification, as both options are selected). Only objects with the Active box checked will be corrupted, and they will be corrupted in the order specified in the Corruption Order field on the CMDT records, with nulls being corrupted last.
 
@@ -31,7 +31,7 @@ In order to run the code, you will enter the following Anonymous Apex snippet, s
 new DX_DataCorruptionQueueableChain('your-email-address@yourcompany.com').runJob();
 ```
 
-![Screenshot of Anonymous Apex Snippet.](https://github.com/user-attachments/assets/529454b1-ccc7-4be5-ae0e-1254865cedb9)
+![Screenshot of Anonymous Apex Snippet.](https://github.com/user-attachments/assets/72b99a50-8843-449d-a68f-0b77a7eb0671)
 
 Once each job is complete, you will receive an email notifying you that the job is complete so you don't have to keep checking your Apex Job Logs.
 
