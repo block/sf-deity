@@ -26,8 +26,8 @@ public without sharing class DX_DataCorruptionHelper {
     @TestVisible private Boolean corruptByDeletion;
     @TestVisible private Boolean corruptByModification;
 
-    @TestVisible private transient List<Database.SaveResult> modifiedRecords = new List<Database.SaveResult>();
-    @TestVisible private transient List<Database.DeleteResult> deletedRecords = new List<Database.DeleteResult>();
+    @TestVisible private List<Result> modifiedRecords = new List<Result>();
+    @TestVisible private List<Result> deletedRecords = new List<Result>();
 
     public void withMocks() {
         this.dml = (DX_DML) DX_MockUtil.createMock(DX_DML.class);
@@ -40,7 +40,7 @@ public without sharing class DX_DataCorruptionHelper {
     public DX_DataCorruptionHelper(Data_Corruption_Object__mdt sObjectToCorrupt) {
         try {
             this.sObjectApiName = sObjectToCorrupt.Custom_Object__c == false ? sObjectToCorrupt.MasterLabel : sObjectToCorrupt.MasterLabel + '__c';
-            this.percentToCorrupt = Integer.valueOf(sObjectToCorrupt.Percent_To_Corrupt__c * 100);
+            this.percentToCorrupt = Integer.valueOf(sObjectToCorrupt.Percent_To_Corrupt__c);
 
             this.corruptByDeletion = sObjectToCorrupt.Delete_Records__c;
             this.corruptByModification = sObjectToCorrupt.Modify_Records__c;
@@ -109,7 +109,7 @@ public without sharing class DX_DataCorruptionHelper {
     * @description corrupts data in Salesforce org by hard deleting or updating a field on specified records
     * @param List<sObject> records to process
     * @return None
-     */
+    */
     public void corruptData(List<SObject> sObjectsToCorrupt) {
         if(!this.isSandbox) {
             throw new DX_DataCorruptionQueueableChain.DataCorruptionException('This code should not be run in a production environment. This action will cause mass data loss.');
@@ -148,7 +148,7 @@ public without sharing class DX_DataCorruptionHelper {
     * @description corrupts data in Salesforce org by modifying fields and then updating specified records
     * @param List<sObject> records to process
     * @return List<sObject> records corrupted by modification
-     */
+    */
     public List<sObject> corruptFields(List<SObject> sObjectsToCorrupt) {
         if(!this.isSandbox) {
             throw new DX_DataCorruptionQueueableChain.DataCorruptionException('This code should not be run in a production environment. This action will cause mass data loss.');
@@ -176,18 +176,48 @@ public without sharing class DX_DataCorruptionHelper {
     * @description corrupts data in Salesforce org by hard deleting specified records
     * @param List<sObject> records to delete
     * @return none
-     */
+    */
     public void deleteData(List<SObject> sObjectsToDelete) {
-        this.deletedRecords.addAll(dml.deleteRecords(sObjectsToDelete));
+        List<Database.DeleteResult> deleted = this.dml.deleteRecords(sObjectsToDelete);
         Database.emptyRecycleBin(sObjectsToDelete);
+
+        for(Database.DeleteResult dr : deleted) {
+            Result res = new Result(dr.getId(), dr.isSuccess());
+
+            this.deletedRecords.add(res);
+        }
     }
 
     /**
     * @description corrupts data in Salesforce org by updating fields on specified records
     * @param List<sObject> records to update
     * @return None
-     */
+    */
     public void modifyData(List<SObject> corruptedSObjects) {
-        this.modifiedRecords.addAll(dml.updateRecords(corruptedSObjects));
+        List<Database.SaveResult> modified = this.dml.updateRecords(corruptedSObjects);
+
+        for(Database.SaveResult sr : modified) {
+            Result res = new Result(sr.getId(), sr.isSuccess());
+
+            this.modifiedRecords.add(res);
+        }
+    }
+
+    /**
+     * @description: wrapper for Database.XXResult mocking
+     */
+    public class Result {
+        public String id;
+        public Boolean success;
+
+        /**
+         * @description: constructor for Database.XXResult mocking
+         * @param Boolean success
+         * @param String id
+         */
+        public Result(Boolean success, String id) {
+            this.id = id;
+            this.success = success;
+        }
     }
 }
