@@ -1,7 +1,7 @@
 public with sharing class DX_DataCorruptionChecker {
-    @TestVisible public static Boolean isSandbox = [SELECT Id, IsSandbox FROM Organization LIMIT 1].isSandbox;
-    @TestVisible public static Boolean isRunningTest = Test.isRunningTest();
-    @TestVisible public static Boolean hasPermission = FeatureManagement.checkPermission('Corrupt_Data');
+    public static Boolean isSandbox = [SELECT Id, IsSandbox FROM Organization LIMIT 1].isSandbox;
+    public static Boolean isRunningTest = Test.isRunningTest();
+    public static Boolean hasPermission = FeatureManagement.checkPermission('Corrupt_Data');
 
     /**
      * @description: checks if user has requisite perms and ensures code is in sandbox
