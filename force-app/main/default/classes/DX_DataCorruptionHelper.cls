@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-public without sharing class DX_DataCorruptionHelper {
+public with sharing class DX_DataCorruptionHelper {
     @TestVisible private DX_DML dml = new DX_DML();
-    @TestVisible private Boolean isSandbox = [SELECT Id, IsSandbox FROM Organization LIMIT 1].isSandbox;
+
     @TestVisible private String sObjectApiName;
     @TestVisible private List<String> sObjectTextFields = new List<String>();
     @TestVisible private List<String> sObjectNumberFields = new List<String>();
@@ -38,6 +38,8 @@ public without sharing class DX_DataCorruptionHelper {
      * @param Data_Corruption_Object__mdt sObjectToCorrupt represents a custom metadata object for a given sObject
      */
     public DX_DataCorruptionHelper(Data_Corruption_Object__mdt sObjectToCorrupt) {
+        DX_DataCorruptionChecker.canRun();
+
         try {
             this.sObjectApiName = sObjectToCorrupt.Custom_Object__c == false ? sObjectToCorrupt.MasterLabel : sObjectToCorrupt.MasterLabel + '__c';
             this.percentToCorrupt = Integer.valueOf(sObjectToCorrupt.Percent_To_Corrupt__c);
@@ -89,8 +91,13 @@ public without sharing class DX_DataCorruptionHelper {
  	 * @return String - returns the dynamic SOQL query for use in the DX_DataCorruptionBatch class
  	 */
     public String buildQuery() {
-        if(!this.isSandbox) {
-            throw new DX_DataCorruptionQueueableChain.DataCorruptionException('This code should not be run in a production environment. This action will cause mass data loss.');
+        DX_DataCorruptionChecker.canRun();
+
+        try {
+            //check to ensure sObject exists before querying for it
+            Schema.SObjectType sObjType = ((SObject)(Type.forName('Schema.'+ this.sObjectApiName).newInstance())).getSObjectType();
+        } catch (Exception e) {
+            throw new DX_DataCorruptionQueueableChain.DataCorruptionException('There was an error provisioning the custom metadata for ' + this.sObjectApiName + '. Please ensure that this sObject exists.');
         }
 
         String corruptionQuery = 'SELECT ' + String.join(this.sObjectFieldsToCorrupt, ', ') + ' FROM ' + this.sObjectApiName;
@@ -111,36 +118,38 @@ public without sharing class DX_DataCorruptionHelper {
     * @return None
     */
     public void corruptData(List<SObject> sObjectsToCorrupt) {
-        if(!this.isSandbox) {
-            throw new DX_DataCorruptionQueueableChain.DataCorruptionException('This code should not be run in a production environment. This action will cause mass data loss.');
-        }
-        
-        List<SObject> sObjectsToDelete = new List<SObject>();
-        List<SObject> sObjectsToUpdate = new List<SObject>();
+        DX_DataCorruptionChecker.canRun();
 
-        if(this.corruptByDeletion == true && this.corruptByModification == true && this.sObjectFieldsToCorrupt.size() > 0) {
-            for(Integer ii = 0; ii < sObjectsToCorrupt.size(); ii++) {
-                if(Math.mod(ii, 2) == 0) { //hard delete even records
-                    sObjectsToDelete.add(sObjectsToCorrupt[ii]);
-                } else { //update field on odd records
-                    sObjectsToUpdate.add(sObjectsToCorrupt[ii]);
+        try {
+            List<SObject> sObjectsToDelete = new List<SObject>();
+            List<SObject> sObjectsToUpdate = new List<SObject>();
+
+            if(this.corruptByDeletion == true && this.corruptByModification == true && this.sObjectFieldsToCorrupt.size() > 0) {
+                for(Integer ii = 0; ii < sObjectsToCorrupt.size(); ii++) {
+                    if(Math.mod(ii, 2) == 0) { //hard delete even records
+                        sObjectsToDelete.add(sObjectsToCorrupt[ii]);
+                    } else { //update field on odd records
+                        sObjectsToUpdate.add(sObjectsToCorrupt[ii]);
+                    }
                 }
+            } else if (this.corruptByModification && this.sObjectFieldsToCorrupt.size() > 0) {
+                sObjectsToUpdate.addAll(sObjectsToCorrupt);
+            } else if (this.corruptByDeletion) {
+                sObjectsToDelete.addAll(sObjectsToCorrupt);
+            } else{
+                throw new DX_DataCorruptionQueueableChain.DataCorruptionException('No fields have been specified for modification on ' + this.sObjectApiName + '.');
             }
-        } else if (this.corruptByModification && this.sObjectFieldsToCorrupt.size() > 0) {
-            sObjectsToUpdate.addAll(sObjectsToCorrupt);
-        } else if (this.corruptByDeletion) {
-            sObjectsToDelete.addAll(sObjectsToCorrupt);
-        } else{
+
+
+            if(sObjectsToDelete.size() > 0){
+                deleteData(sObjectsToDelete);
+            }
+
+            if(sObjectsToUpdate.size() > 0){
+                modifyData(corruptFields(sObjectsToUpdate));
+            }
+        } catch (Exception e) {
             throw new DX_DataCorruptionQueueableChain.DataCorruptionException('No fields have been specified for modification on ' + this.sObjectApiName + '.');
-        }
-
-
-        if(sObjectsToDelete.size() > 0){
-            deleteData(sObjectsToDelete);
-        }
-
-        if(sObjectsToUpdate.size() > 0){
-            modifyData(corruptFields(sObjectsToUpdate));
         }
     }
 
@@ -150,9 +159,7 @@ public without sharing class DX_DataCorruptionHelper {
     * @return List<sObject> records corrupted by modification
     */
     public List<sObject> corruptFields(List<SObject> sObjectsToCorrupt) {
-        if(!this.isSandbox) {
-            throw new DX_DataCorruptionQueueableChain.DataCorruptionException('This code should not be run in a production environment. This action will cause mass data loss.');
-        }
+        DX_DataCorruptionChecker.canRun();
         
         List<sObject> corruptedSObjects = new List<sObject>();
 

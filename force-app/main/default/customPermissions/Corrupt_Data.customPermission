@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomPermission xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>A custom permission to allow for the corruption of data via sf-deity.</description>
+    <isLicensed>false</isLicensed>
+    <label>Corrupt Data</label>
+</CustomPermission>

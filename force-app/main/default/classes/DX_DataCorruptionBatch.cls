@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
- public without sharing class DX_DataCorruptionBatch implements Database.Batchable<SObject> {
-    
-    @TestVisible private Boolean isSandbox = [SELECT Id, IsSandbox FROM Organization LIMIT 1].isSandbox;
-    @TestVisible private Boolean isTesting = Test.isRunningTest();
-    
+ public with sharing class DX_DataCorruptionBatch implements Database.Batchable<SObject> {
     @TestVisible private String corruptionQuery;
     @TestVisible private Data_Corruption_Object__mdt sObjectToCorrupt;
     @TestVisible private String emailAddress;
@@ -34,13 +30,11 @@
      * @param String emailAddress, the email to send an alert to when each job completes
      */
     public DX_DataCorruptionBatch(DX_QueueableJobChain chain, Data_Corruption_Object__mdt sObjectToCorrupt, String emailAddress) {
-        if(!this.isSandbox) {
-            throw new DX_DataCorruptionQueueableChain.DataCorruptionException('This code should not be run in a production environment. This action will cause mass data loss.');
-        }
+        DX_DataCorruptionChecker.canRun();
 
         this.helper = new DX_DataCorruptionHelper(sobjectToCorrupt);
 
-        if(this.isTesting) {
+        if(DX_DataCorruptionChecker.isRunningTest) {
             this.helper.withMocks();
         }
 
@@ -56,6 +50,8 @@
      * @return Database.QueryLocator
      */
     public Database.QueryLocator start(Database.BatchableContext BC) {
+        DX_DataCorruptionChecker.canRun();
+
         try {
             return Database.getQueryLocator(this.corruptionQuery);
         } catch(Exception e) {
@@ -69,6 +65,8 @@
      * @param List<sObject> sObjectsToCorrupt
      */
     public void execute(Database.BatchableContext BC, List<sObject> sObjectsToCorrupt){
+        DX_DataCorruptionChecker.canRun();
+
         this.helper.corruptData(sObjectsToCorrupt);
     }
     
@@ -77,13 +75,15 @@
      * @param Database.BatchableContext BC
      */
     public void finish(Database.BatchableContext BC){
+        DX_DataCorruptionChecker.canRun();
+
         String sObjName = this.sObjectToCorrupt.Masterlabel;
         String subject = sObjName + ' corruption batch complete.';
         String body = 'The DX_DataCorruptionBatch class has been completed at ' + this.sObjectToCorrupt.Percent_To_Corrupt__c + '% for the following query: ' + this.corruptionQuery;
 
         sendEmail(subject, body);
 
-        if(!this.isTesting) { //if in sandbox and not running a test, run next chained job
+        if(!DX_DataCorruptionChecker.isRunningTest) { //if in sandbox and not running a test, run next chained job
             this.chain.runNext();
         }
     }
@@ -94,6 +94,8 @@
      * @param String body
      */
     public void sendEmail(String subject, String body) {
+        DX_DataCorruptionChecker.canRun();
+
         OrgWideEmailAddress orgWideEmail = [SELECT Id, Address FROM OrgWideEmailAddress LIMIT 1];
 
         Messaging.SingleEmailMessage emailToSend = new Messaging.SingleEmailMessage();

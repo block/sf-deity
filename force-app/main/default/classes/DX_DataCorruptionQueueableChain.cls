@@ -16,8 +16,6 @@
 
 public without sharing class DX_DataCorruptionQueueableChain {
     @TestVisible private String emailAddress;
-    @TestVisible private Boolean isRunningTest = Test.isRunningTest();
-    @TestVisible private Boolean isSandbox = [SELECT Id, IsSandbox FROM Organization LIMIT 1].IsSandbox;
 
     @TestVisible private DX_QueueableJobChain chain;
 
@@ -26,6 +24,8 @@ public without sharing class DX_DataCorruptionQueueableChain {
      * @param String emailAddress, the email to send an alert to when each job completes
      */
     public DX_DataCorruptionQueueableChain(String emailAddress) {
+        DX_DataCorruptionChecker.canRun();
+
         this.chain = new DX_QueueableJobChain();
         this.emailAddress = emailAddress;
     }
@@ -34,7 +34,9 @@ public without sharing class DX_DataCorruptionQueueableChain {
      * @description: runs the corruption job
      */
     public void runJob() {
-        if(!this.isSandbox) {
+        DX_DataCorruptionChecker.canRun();
+
+        if(!DX_DataCorruptionChecker.isSandbox) {
             throw new DataCorruptionException('This code should not be run in a production environment. This action will cause mass data loss.');
         } else { //if in sandbox, chain jobs
             List<Data_Corruption_Object__mdt> objectsToCorrupt = new DX_CustomMetadataSelector().selectActiveDataCorruptionObjects();
@@ -44,7 +46,7 @@ public without sharing class DX_DataCorruptionQueueableChain {
             }
 
             //chained jobs cannot run in tests
-            if(!this.isRunningTest) {
+            if(!DX_DataCorruptionChecker.isRunningTest) {
                 this.chain.runNext();
             }
         }
