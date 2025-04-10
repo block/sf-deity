@@ -30,20 +30,20 @@ public class DX_DMLMockProvider implements System.StubProvider {
         switch on stubbedMethodName {
             when 'updateRecords' {
                 List<Case> casesInParams = (List<Case>) listOfArgs[0];
-                List<Result> resultList = new List<Result>();
+                List<DX_DataCorruptionHelper.Result> resultList = new List<DX_DataCorruptionHelper.Result>();
 
                 for(Case cs : casesInParams) {
-                    resultList.add(new Result(true, cs.Id));
+                    resultList.add(new DX_DataCorruptionHelper.Result(true, cs.Id));
                 }
     
                 transient List<Database.SaveResult> srList = (List<Database.SaveResult>) JSON.deserialize(JSON.serialize(resultList), List<Database.SaveResult>.class);
                 return srList;
             } when 'deleteRecords' {
                 List<Case> casesInParams = (List<Case>) listOfArgs[0];
-                List<Result> resultList = new List<Result>();
+                List<DX_DataCorruptionHelper.Result> resultList = new List<DX_DataCorruptionHelper.Result>();
 
                 for(Case cs : casesInParams) {
-                    resultList.add(new Result(true, cs.Id));
+                    resultList.add(new DX_DataCorruptionHelper.Result(true, cs.Id));
                 }
     
                 transient List<Database.DeleteResult> srList = (List<Database.DeleteResult>) JSON.deserialize(JSON.serialize(resultList), List<Database.DeleteResult>.class);
@@ -51,19 +51,6 @@ public class DX_DMLMockProvider implements System.StubProvider {
             } when else {
                 return null;
             }
-        }
-    }
-
-    /**
-     * @description: wrapper for Database.XXResult mocking
-     */
-    private class Result {
-        Private Boolean success;
-        Private String id;
-
-        private Result(Boolean success, String id) {
-            this.success = success;
-            this.id = id;
         }
     }
 }
