@@ -17,8 +17,6 @@
 public with sharing class DX_DataCorruptionQueueable extends DX_ChainedQueueable {
     @TestVisible private Data_Corruption_Object__mdt sObjectToCorrupt;
     @TestVisible private String emailAddress;
-    @TestVisible private Boolean isSandbox = [SELECT Id, IsSandbox FROM Organization LIMIT 1].isSandbox;
-    @TestVisible private Boolean isTesting = Test.isRunningTest();
 
     @TestVisible private DX_QueueableJobChain chain;
     
@@ -29,11 +27,13 @@ public with sharing class DX_DataCorruptionQueueable extends DX_ChainedQueueable
      * @param String emailAddress, the email to send an alert to when each job completes
      */
     public DX_DataCorruptionQueueable(DX_QueueableJobChain chain, Data_Corruption_Object__mdt sObjectToCorrupt, String emailAddress) {
-        super(chain);
+        super(chain); //must be first statement in constructor
         this.chain = chain;
 
         this.sObjectToCorrupt = sObjectToCorrupt;
         this.emailAddress = emailAddress;
+
+        DX_DataCorruptionChecker.canRun();
     }
 
     /**
@@ -41,9 +41,7 @@ public with sharing class DX_DataCorruptionQueueable extends DX_ChainedQueueable
      * @param QueueableContext qc
      */
     public override void execute(QueueableContext qc) {
-        if(!this.isSandbox) {
-            throw new DX_DataCorruptionQueueableChain.DataCorruptionException('This code should not be run in a production environment. This action will cause mass data loss.');
-        }
+        DX_DataCorruptionChecker.canRun();
         
         DX_DataCorruptionBatch batch = new DX_DataCorruptionBatch(this.chain, this.sObjectToCorrupt, this.emailAddress);
         Database.executeBatch(batch, batch.defaultBatchSize);
