@@ -215,7 +215,7 @@ public without sharing class DX_DataCorruptionHelper {
          * @param Boolean success
          * @param String id
          */
-        public Result(Boolean success, String id) {
+        public Result(String id, Boolean success) {
             this.id = id;
             this.success = success;
         }
