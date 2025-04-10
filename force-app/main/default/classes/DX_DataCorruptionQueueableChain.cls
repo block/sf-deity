@@ -41,8 +41,16 @@ public without sharing class DX_DataCorruptionQueueableChain {
         } else { //if in sandbox, chain jobs
             List<Data_Corruption_Object__mdt> objectsToCorrupt = new DX_CustomMetadataSelector().selectActiveDataCorruptionObjects();
 
-            for(Data_Corruption_Object__mdt objMdt : objectsToCorrupt) {
-                this.chain.chainLast(new DX_DataCorruptionQueueable(this.chain, objMdt, this.emailAddress));
+            for(Data_Corruption_Object__mdt sObjectToCorrupt : objectsToCorrupt) {
+                try {
+                    String sObjectApiName = sObjectToCorrupt.Custom_Object__c == false ? sObjectToCorrupt.MasterLabel : sObjectToCorrupt.MasterLabel + '__c';
+
+                    //verify sObject exists
+                    SObjectType type = ((SObject)(Type.forName('Schema.' + sObjectApiName).newInstance())).getSObjectType();
+                    this.chain.chainLast(new DX_DataCorruptionQueueable(this.chain, sObjectToCorrupt, this.emailAddress));
+                } catch(Exception e) {
+                    throw new DX_DataCorruptionQueueableChain.DataCorruptionException('There was an error provisioning the custom metadata ' + sObjectToCorrupt.MasterLabel + '. Please ensure that this sObject exists.');
+                }
             }
 
             //chained jobs cannot run in tests
