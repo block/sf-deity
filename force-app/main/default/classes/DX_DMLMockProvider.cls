@@ -33,7 +33,7 @@ public class DX_DMLMockProvider implements System.StubProvider {
                 List<DX_DataCorruptionHelper.Result> resultList = new List<DX_DataCorruptionHelper.Result>();
 
                 for(Case cs : casesInParams) {
-                    resultList.add(new DX_DataCorruptionHelper.Result(true, cs.Id));
+                    resultList.add(new DX_DataCorruptionHelper.Result(cs.Id, true));
                 }
     
                 transient List<Database.SaveResult> srList = (List<Database.SaveResult>) JSON.deserialize(JSON.serialize(resultList), List<Database.SaveResult>.class);
@@ -43,7 +43,7 @@ public class DX_DMLMockProvider implements System.StubProvider {
                 List<DX_DataCorruptionHelper.Result> resultList = new List<DX_DataCorruptionHelper.Result>();
 
                 for(Case cs : casesInParams) {
-                    resultList.add(new DX_DataCorruptionHelper.Result(true, cs.Id));
+                    resultList.add(new DX_DataCorruptionHelper.Result(cs.Id, true));
                 }
     
                 transient List<Database.DeleteResult> srList = (List<Database.DeleteResult>) JSON.deserialize(JSON.serialize(resultList), List<Database.DeleteResult>.class);
