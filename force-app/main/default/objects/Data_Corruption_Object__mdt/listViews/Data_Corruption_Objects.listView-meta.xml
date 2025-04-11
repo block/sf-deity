@@ -7,9 +7,11 @@
     <columns>Text_Fields_To_Corrupt__c</columns>
     <columns>Number_Fields_To_Corrupt__c</columns>
     <columns>Delete_Records__c</columns>
+    <columns>Hard_Delete_Records__c</columns>
     <columns>Modify_Records__c</columns>
     <columns>Percent_To_Corrupt__c</columns>
     <columns>Corruption_Order__c</columns>
     <filterScope>Everything</filterScope>
     <label>Data Corruption Objects</label>
+    <language>en_US</language>
 </ListView>

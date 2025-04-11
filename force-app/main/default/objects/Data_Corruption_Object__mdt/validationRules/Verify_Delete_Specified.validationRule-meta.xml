@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Verify_Delete_Specified</fullName>
+    <active>true</active>
+    <description>Checks to ensure that if Hard Delete is selected, Delete is specified.</description>
+    <errorConditionFormula>AND(
+Hard_Delete_Records__c,
+NOT(Delete_Records__c)
+)</errorConditionFormula>
+    <errorMessage>In order to corrupt via hard deletion, please specify Delete Records.</errorMessage>
+</ValidationRule>

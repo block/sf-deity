@@ -24,6 +24,7 @@ public with sharing class DX_DataCorruptionHelper {
     @TestVisible private Set<String> sObjectAllFields;
     @TestVisible private Integer percentToCorrupt;
     @TestVisible private Boolean corruptByDeletion;
+    @TestVisible private Boolean corruptByHardDeletion;
     @TestVisible private Boolean corruptByModification;
 
     @TestVisible private List<Result> modifiedRecords = new List<Result>();
@@ -41,10 +42,11 @@ public with sharing class DX_DataCorruptionHelper {
         DX_DataCorruptionChecker.canRun();
 
         try {
-            this.sObjectApiName = sObjectToCorrupt.Custom_Object__c == false ? sObjectToCorrupt.MasterLabel : sObjectToCorrupt.MasterLabel + '__c';
+            this.sObjectApiName = sObjectToCorrupt.Custom_Object__c == false ? sObjectToCorrupt.DeveloperName : sObjectToCorrupt.DeveloperName + '__c';
             this.percentToCorrupt = Integer.valueOf(sObjectToCorrupt.Percent_To_Corrupt__c);
 
             this.corruptByDeletion = sObjectToCorrupt.Delete_Records__c;
+            this.corruptByHardDeletion = sObjectToCorrupt.Hard_Delete_Records__c;
             this.corruptByModification = sObjectToCorrupt.Modify_Records__c;
 
             if(this.corruptByModification == true) {
@@ -113,10 +115,10 @@ public with sharing class DX_DataCorruptionHelper {
     }
 
     /**
-    * @description corrupts data in Salesforce org by hard deleting or updating a field on specified records
-    * @param List<sObject> records to process
-    * @return None
-    */
+     * @description corrupts data in Salesforce org by hard deleting or updating a field on specified records
+     * @param List<sObject> records to process
+     * @return None
+     */
     public void corruptData(List<SObject> sObjectsToCorrupt) {
         DX_DataCorruptionChecker.canRun();
 
@@ -154,10 +156,10 @@ public with sharing class DX_DataCorruptionHelper {
     }
 
     /**
-    * @description corrupts data in Salesforce org by modifying fields and then updating specified records
-    * @param List<sObject> records to process
-    * @return List<sObject> records corrupted by modification
-    */
+     * @description corrupts data in Salesforce org by modifying fields and then updating specified records
+     * @param List<sObject> records to process
+     * @return List<sObject> records corrupted by modification
+     */
     public List<sObject> corruptFields(List<SObject> sObjectsToCorrupt) {
         DX_DataCorruptionChecker.canRun();
         
@@ -180,26 +182,29 @@ public with sharing class DX_DataCorruptionHelper {
     }
 
     /**
-    * @description corrupts data in Salesforce org by hard deleting specified records
-    * @param List<sObject> records to delete
-    * @return none
-    */
+     * @description corrupts data in Salesforce org by hard deleting specified records
+     * @param List<sObject> records to delete
+     * @return none
+     */
     public void deleteData(List<SObject> sObjectsToDelete) {
         List<Database.DeleteResult> deleted = this.dml.deleteRecords(sObjectsToDelete);
-        Database.emptyRecycleBin(sObjectsToDelete);
 
         for(Database.DeleteResult dr : deleted) {
             Result res = new Result(dr.getId(), dr.isSuccess());
 
             this.deletedRecords.add(res);
         }
+
+        if(this.corruptByHardDeletion) {
+            Database.emptyRecycleBin(sObjectsToDelete);
+        }
     }
 
     /**
-    * @description corrupts data in Salesforce org by updating fields on specified records
-    * @param List<sObject> records to update
-    * @return None
-    */
+     * @description corrupts data in Salesforce org by updating fields on specified records
+     * @param List<sObject> records to update
+     * @return None
+     */
     public void modifyData(List<SObject> corruptedSObjects) {
         List<Database.SaveResult> modified = this.dml.updateRecords(corruptedSObjects);
 

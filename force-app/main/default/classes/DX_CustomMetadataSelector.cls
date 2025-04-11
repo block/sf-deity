@@ -20,11 +20,13 @@ public without sharing class DX_CustomMetadataSelector {
      */
     public List<Data_Corruption_Object__mdt> selectActiveDataCorruptionObjects() {
        return DX_Query.records([SELECT Masterlabel,
+                DeveloperName,
                 Number_Fields_To_Corrupt__c,
                 Text_Fields_To_Corrupt__c,
                 Custom_Object__c,
                 Corruption_Order__c,
                 Delete_Records__c,
+                Hard_Delete_Records__c,
                 Modify_Records__c,
                 Percent_To_Corrupt__c
             FROM Data_Corruption_Object__mdt

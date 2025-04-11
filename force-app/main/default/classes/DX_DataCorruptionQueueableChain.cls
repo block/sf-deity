@@ -43,7 +43,7 @@ public without sharing class DX_DataCorruptionQueueableChain {
 
             for(Data_Corruption_Object__mdt sObjectToCorrupt : objectsToCorrupt) {
                 try {
-                    String sObjectApiName = sObjectToCorrupt.Custom_Object__c == false ? sObjectToCorrupt.MasterLabel : sObjectToCorrupt.MasterLabel + '__c';
+                    String sObjectApiName = sObjectToCorrupt.Custom_Object__c == false ? sObjectToCorrupt.DeveloperName : sObjectToCorrupt.DeveloperName + '__c';
 
                     //verify sObject exists
                     SObjectType type = ((SObject)(Type.forName('Schema.' + sObjectApiName).newInstance())).getSObjectType();
